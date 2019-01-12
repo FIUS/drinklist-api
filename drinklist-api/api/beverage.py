@@ -51,7 +51,7 @@ class BeverageList(Resource):
             abort(500)
 
 @BEVERAGE_NS.route('/<int:beverage_id>/')
-class UserDetail(Resource):
+class BeverageDetail(Resource):
     """
     A single beverage
     """

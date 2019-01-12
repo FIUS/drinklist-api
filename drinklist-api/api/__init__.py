@@ -187,7 +187,7 @@ class RootResource(Resource):
 
 API.render_root = RootResource.get
 
-from . import user, beverage, authentication
+from . import user, beverage, authentication, transaction
 
 HISTORY_NS = API.namespace('history', description='History', path='/history')
 
