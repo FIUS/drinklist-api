@@ -1,5 +1,5 @@
 from os import environ
-from logging import Logger
+from logging import Logger, getLogger
 
 from flask import Flask, logging
 from flask_sqlalchemy import SQLAlchemy
@@ -30,6 +30,8 @@ APP.logger: Logger
 APP.logger.debug('Debug logging enabled')
 APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_URI'])
 
+AUTH_LOGGER = getLogger('flask.app.auth')  # type: Logger
+
 # Setup DB with Migrations and bcrypt
 DB: SQLAlchemy
 DB = SQLAlchemy(APP, metadata=MetaData(naming_convention={
@@ -45,10 +47,14 @@ MIGRATE: Migrate = Migrate(APP, DB)
 # Setup JWT
 JWT: JWTManager = JWTManager(APP)
 
+from . import auth_providers
+
 # pylint: disable=C0413
 from . import db_models
 # pylint: disable=C0413
 from . import routes
+
+
 
 if APP.config.get('DEBUG', False):
     from . import debug_routes
