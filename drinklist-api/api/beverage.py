@@ -3,6 +3,7 @@ from flask_restplus import Api, Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from . import API
+from . import APP
 from .api_models import BEVERAGE_GET
 from .api_models import BEVERAGE_POST
 from .api_models import BEVERAGE_PUT
@@ -45,7 +46,7 @@ class BeverageList(Resource):
             return marshal(new, BEVERAGE_GET), 201
         except IntegrityError as err:
             message = str(err)
-            if 'UNIQUE constraint failed' in message:
+            if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
                 abort(409, 'Name is not unique!')
             abort(500)
 
