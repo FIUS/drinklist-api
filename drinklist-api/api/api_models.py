@@ -12,6 +12,13 @@ ROOT_MODEL = API.model('RootModel', {
     'history': fields.Url('api.history_history_resource'),
 })
 
+AUTHENTICATION_ROUTES_MODEL = API.model('AuthenticationRoutesModel', {
+    'login': fields.Url('api.auth_login'),
+    'fresh_login': fields.Url('api.auth_fresh_login'),
+    'refresh': fields.Url('api.auth_refresh'),
+    'check': fields.Url('api.auth_check'),
+})
+
 
 BEVERAGE_POST = API.model('BeveragePOST', {
     'name': fields.String(max_length=STD_STRING_SIZE, title='Name'),

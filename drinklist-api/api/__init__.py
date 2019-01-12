@@ -2,13 +2,15 @@
 Main API Module
 """
 from typing import List
+from functools import wraps
 from flask import Blueprint
 from flask_restplus import Api, Resource, abort, marshal
-from flask_jwt_extended import jwt_required, jwt_optional
+from flask_jwt_extended import jwt_required, jwt_optional, get_jwt_claims
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from jwt import ExpiredSignatureError, InvalidTokenError
 
-from .. import APP, JWT
+from .. import APP, JWT, AUTH_LOGGER
+from ..login import AuthUser, UserRole
 
 from ..db_models.transaction import Transaction
 
@@ -27,6 +29,32 @@ AUTHORIZATIONS = {
     }
 }
 
+def satisfies_role(role: UserRole):
+    """
+    Check if the requesting user has one of the given roles.
+
+    Must be applied after jwt_required decorator!
+    """
+    def has_roles_decorator(func):
+        """
+        Decorator function
+        """
+        @wraps(func)
+        # pylint: disable=R1710
+        def wrapper(*args, **kwargs):
+            """
+            Wrapper function
+            """
+            role_claims = get_jwt_claims()
+            if role > role_claims:
+                AUTH_LOGGER.debug('Access to ressource with isufficient rights. User role: %s, required role: %s',
+                                  UserRole(role_claims), role)
+                abort(403, 'Only users with {} privileges have access to this resource.'.format(role.name))
+            else:
+                return func(*args, **kwargs)
+        return wrapper
+    return has_roles_decorator
+
 
 API_BLUEPRINT = Blueprint('api', __name__)
 
@@ -42,7 +70,24 @@ API = Api(API_BLUEPRINT, version='0.1', title='TTF API', doc='/doc/',
 # pylint: disable=C0413
 from .api_models import ROOT_MODEL, TRANSACTION_GET
 
-from . import user, beverage
+@JWT.user_identity_loader
+def load_user_identity(user: AuthUser):
+    """
+    Loader for the user identity
+    """
+    return user.name
+
+
+@JWT.user_claims_loader
+def load_user_claims(user: AuthUser):
+    """
+    Loader for the user claims
+    """
+    return user.role.value
+
+@JWT.claims_verification_loader
+def verify_claims(claims):
+    return True
 
 @JWT.expired_token_loader
 @API.errorhandler(ExpiredSignatureError)
@@ -141,6 +186,8 @@ class RootResource(Resource):
         return None
 
 API.render_root = RootResource.get
+
+from . import user, beverage, authentication
 
 HISTORY_NS = API.namespace('history', description='History', path='/history')
 
