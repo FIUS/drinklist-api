@@ -25,3 +25,7 @@ class Beverage(DB.Model):
         self.price = price
         self.stock = stock
 
+    def update(self, name: str, price: int, stock: int = 0):
+        self.name = name
+        self.price = price
+        self.stock = stock
