@@ -1,3 +1,33 @@
+# IDEs and editors
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+*.orig
+
+# IDE - VSCode
+*.vscode/*
+
+
+# Flask config
+instance/total-tolles-ferleihsystem.conf
+
+
+
+
+
+
+
+
+
+
+
+################################################################################
+####### Python Stuff ###########################################################
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
