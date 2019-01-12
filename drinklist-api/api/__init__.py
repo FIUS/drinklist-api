@@ -10,7 +10,7 @@ from jwt import ExpiredSignatureError, InvalidTokenError
 
 from .. import APP, JWT
 
-from ..db_models.history import History
+from ..db_models.transaction import Transaction
 
 AUTHORIZATIONS = {
     'jwt': {
@@ -40,7 +40,7 @@ API = Api(API_BLUEPRINT, version='0.1', title='TTF API', doc='/doc/',
           description='API for TTF.')
 
 # pylint: disable=C0413
-from .api_models import ROOT_MODEL, HISTORY_GET
+from .api_models import ROOT_MODEL, TRANSACTION_GET
 
 from . import user, beverage
 
@@ -151,11 +151,11 @@ class HistoryResource(Resource):
     """
 
     #@jwt_required
-    @API.marshal_list_with(HISTORY_GET)
+    @API.marshal_list_with(TRANSACTION_GET)
     # pylint: disable=R0201
     def get(self):
         """
         Get a list of all lendings currently in the system
         """
-        return History.query.all()
+        return Transaction.query.all()
 
