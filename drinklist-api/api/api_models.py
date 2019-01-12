@@ -19,8 +19,9 @@ BEVERAGE_POST = API.model('BeveragePOST', {
     'stock': fields.Integer(title='Stock'),
 })
 
+BEVERAGE_PUT = API.inherit('BeveragePUT', BEVERAGE_POST, {})
 
-BEVERAGE_GET = API.inherit('BeverageGET', BEVERAGE_POST, {
+BEVERAGE_GET = API.inherit('BeverageGET', BEVERAGE_PUT, {
     'id': fields.Integer(min=1, example=1, readonly=True, title='Internal Identifier'),
 })
 
