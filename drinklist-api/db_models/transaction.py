@@ -28,11 +28,8 @@ class Transaction(DB.Model):
     cancels = DB.relationship('Transaction', lazy='joined')
 
     def __init__(self):
-        self.user = None
-        self.beverage = None
-        self.beverage_count = None
+        self.user_id = None
         self.amount = None
-        self.balance = 0
         self.reason = None
-        self.cancels = None
+        self.cancels_id = None
 

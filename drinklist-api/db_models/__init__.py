@@ -8,7 +8,7 @@ from .. import APP, DB
 STD_STRING_SIZE = 190  # Max size that allows Indices while using utf8mb4 in MySql DB
 
 
-from . import beverage, user, history
+from . import beverage, user, transaction, transaction_beverage
 
 
 if APP.config.get('SQLALCHEMY_DATABASE_URI', '').startswith('sqlite://'):
