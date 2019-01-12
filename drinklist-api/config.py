@@ -37,9 +37,9 @@ class DebugConfig(Config):
         "user2": "user2",
     }
 
-    BASIC_AUTH_ADMINS = ["admin"]
+    BASIC_AUTH_ADMIN = ["admin"]
     BASIC_AUTH_KIOSK = ["kiosk"]
-    BASIC_AUTH_USER = ["user"]
+    BASIC_AUTH_USER = ["user1", "user2"]
 
 class TestingConfig(Config):
     TESTING = True

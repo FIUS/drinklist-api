@@ -155,10 +155,11 @@ class LoginService():
                 user_obj = AuthUser(user, provider)
                 if provider.is_admin(user):
                     user_obj.role = UserRole.ADMIN
-                elif provider.is_moderator(user):
-                    user_obj.role = UserRole.MODERATOR
-                elif provider.is_consuming_user(user):
-                    db_user = User.query().filter(User.name == user)
+                elif provider.is_kiosk_user(user):
+                    user_obj.role = UserRole.KIOSK
+                
+                if provider.is_consuming_user(user):
+                    db_user = User.query.filter(User.name == user).first()
                     if db_user is None:
                         db_user = User(user)
                         DB.session.add(db_user)
