@@ -41,12 +41,21 @@ TRANSACTION_BEVERAGE_GET = API.model('TransactionBeverageGET', {
     'price': fields.Float(title='Price of beverage'),
 })
 
-TRANSACTION_GET = API.model('TransactionGET', {
+TRANSACTION_POST = API.model('TransactionPOST', {
     'user': fields.Nested(USER_GET),
-    'beverages': fields.List(fields.Nested(TRANSACTION_BEVERAGE_GET), attribute="_beverages"),
+    'beverages': fields.List(fields.Nested(TRANSACTION_BEVERAGE_GET)),
     'amount': fields.Integer(),
-    'balance': fields.Integer(),
     'reason': fields.String(),
-    'cancels-id': fields.Integer(),
+    'cancels_id': fields.Integer(),
+})
+
+TRANSACTION_PUT = API.inherit('TransactionPUT', TRANSACTION_POST, {})
+
+TRANSACTION_GET = API.inherit('TransactionGET', TRANSACTION_PUT, {
+    'id': fields.Integer(),
     'timestamp': fields.DateTime(),
+})
+
+TRANSACTION_DELETE = API.model('TransactionDELETE', {
+    'reason': fields.String(),
 })
