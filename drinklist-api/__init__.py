@@ -6,6 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.schema import MetaData
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
+from flask_cors import CORS
 
 APP = Flask(__name__, instance_relative_config=True)  # type: Flask
 
@@ -46,6 +47,9 @@ MIGRATE: Migrate = Migrate(APP, DB)
 
 # Setup JWT
 JWT: JWTManager = JWTManager(APP)
+
+# Setup Headers
+CORS(APP)
 
 from . import auth_providers
 
