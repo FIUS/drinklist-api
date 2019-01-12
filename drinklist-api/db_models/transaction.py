@@ -30,7 +30,7 @@ class Transaction(DB.Model):
     user = DB.relationship(User, lazy='joined')
     cancels = DB.relationship('Transaction', lazy='joined')
 
-    def __init__(self, user: User, amount: int, reason: str, timestamp: datetime, cancels: Transaction=None):
+    def __init__(self, user: User, amount: int, reason: str, timestamp: datetime, cancels: 'Transaction'=None):
         self.user = user
         self.amount = amount
         self.reason = reason
