@@ -1,7 +1,7 @@
 """
 Module containing database models for everything concerning Transaction entries.
 """
-from datetime import datetime
+
 from sqlalchemy.sql import func
 from typing import List
 
@@ -30,10 +30,11 @@ class Transaction(DB.Model):
     user = DB.relationship(User, lazy='joined')
     cancels = DB.relationship('Transaction', lazy='joined')
 
-    def __init__(self, user: User, amount: int, reason: str, timestamp: datetime, cancels: 'Transaction'=None):
+    def __init__(self, user: User, amount: int, reason: str, cancels: 'Transaction' = None):
         self.user = user
         self.amount = amount
         self.reason = reason
-        self.cancels = cancels
+        if cancels is not None:
+            self.cancels = [cancels]
 
 

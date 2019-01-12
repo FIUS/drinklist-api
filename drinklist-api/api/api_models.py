@@ -30,7 +30,7 @@ BEVERAGE_POST = API.model('BeveragePOST', {
 BEVERAGE_PUT = API.inherit('BeveragePUT', BEVERAGE_POST, {})
 
 BEVERAGE_GET = API.inherit('BeverageGET', BEVERAGE_PUT, {
-    'id': fields.Integer(min=1, example=1, readonly=True, title='Internal Identifier'),
+    'id': fields.Integer(min=1, example=1, title='Internal Identifier'),
 })
 
 USER_PUT = API.model('UserPUT', {
@@ -50,18 +50,18 @@ TRANSACTION_BEVERAGE_GET = API.model('TransactionBeverageGET', {
 })
 
 TRANSACTION_POST = API.model('TransactionPOST', {
-    'user': fields.Nested(USER_GET),
     'beverages': fields.List(fields.Nested(TRANSACTION_BEVERAGE_GET)),
     'amount': fields.Integer(),
     'reason': fields.String(),
-    'cancels_id': fields.Integer(),
 })
 
-TRANSACTION_PUT = API.inherit('TransactionPUT', TRANSACTION_POST, {})
-
-TRANSACTION_GET = API.inherit('TransactionGET', TRANSACTION_PUT, {
+TRANSACTION_GET_NOCHILD = API.inherit('TransactionNoChildGET', TRANSACTION_POST, {
     'id': fields.Integer(),
     'timestamp': fields.DateTime(),
+})
+
+TRANSACTION_GET = API.inherit('TransactionGET', TRANSACTION_GET_NOCHILD, {
+    'cancels': fields.Nested(TRANSACTION_GET_NOCHILD),
 })
 
 TRANSACTION_DELETE = API.model('TransactionDELETE', {

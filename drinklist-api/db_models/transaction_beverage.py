@@ -20,8 +20,8 @@ class TransactionBeverage(DB.Model):
 
     transaction_id = DB.Column(DB.Integer, DB.ForeignKey(Transaction.id), primary_key=True)
     beverage_id = DB.Column(DB.Integer, DB.ForeignKey(Beverage.id), primary_key=True)
-    count = DB.Column(DB.Integer, nullable=True)
-    price = DB.Column(DB.Integer, nullable=True)
+    count = DB.Column(DB.Integer)
+    price = DB.Column(DB.Integer)
 
     transaction = DB.relationship(Transaction, lazy='select', backref=DB.backref('beverages', lazy='joined'))
     beverage = DB.relationship(Beverage, lazy='joined')
@@ -29,5 +29,5 @@ class TransactionBeverage(DB.Model):
     def __init__(self, transaction: Transaction, beverage: Beverage, count: int, price: int):
         self.transaction = transaction
         self.beverage = beverage
-        self.beverage_count = count
+        self.count = count
         self.price = price
