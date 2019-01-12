@@ -10,6 +10,7 @@ ROOT_MODEL = API.model('RootModel', {
     'beverages': fields.Url('api.beverages_beverage_list'),
     'users': fields.Url('api.users_user_list'),
     'history': fields.Url('api.history_history_resource'),
+    'authentication': fields.Url('api.auth_authentication_routes'),
 })
 
 AUTHENTICATION_ROUTES_MODEL = API.model('AuthenticationRoutesModel', {

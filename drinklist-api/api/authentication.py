@@ -67,7 +67,7 @@ class AuthenticationRoutes(Resource):
     # pylint: disable=R0201
     def get(self):
         """Authentication root resource."""
-        return
+        return {}
 
 @ANS.route('/login/')
 class Login(Resource):
