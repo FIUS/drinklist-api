@@ -8,11 +8,9 @@ from flask_jwt_extended import jwt_required, jwt_optional
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from jwt import ExpiredSignatureError, InvalidTokenError
 
-from . import APP, JWT
+from .. import APP, JWT
 
-from .db_models.beverage import Beverage
-from .db_models.user import User
-from .db_models.history import History
+from ..db_models.history import History
 
 AUTHORIZATIONS = {
     'jwt': {
@@ -41,10 +39,10 @@ API = Api(API_BLUEPRINT, version='0.1', title='TTF API', doc='/doc/',
           authorizations=AUTHORIZATIONS, security='jwt',
           description='API for TTF.')
 
-
 # pylint: disable=C0413
-from .api_models import *
+from .api_models import ROOT_MODEL, HISTORY_GET
 
+from . import user, beverage
 
 @JWT.expired_token_loader
 @API.errorhandler(ExpiredSignatureError)
@@ -143,48 +141,6 @@ class RootResource(Resource):
         return None
 
 API.render_root = RootResource.get
-
-
-BEVERAGE_NS = API.namespace('beverages', description='Beverages', path='/beverages')
-
-@BEVERAGE_NS.route('/')
-class BeverageList(Resource):
-    """
-    Beverages
-    """
-
-    #@jwt_required
-    #@API.param('active', 'get only active lendings', type=bool, required=False, default=True)
-    @API.marshal_list_with(BEVERAGE_GET)
-    # pylint: disable=R0201
-    def get(self):
-        """
-        Get a list of all lendings currently in the system
-        """
-        #active = request.args.get('active', 'false') == 'true'
-
-        #if active:
-        #    base_query = base_query.join(ItemToLending).distinct()
-        return Beverage.query.all()
-
-
-USER_NS = API.namespace('users', description='Users', path='/users')
-
-@USER_NS.route('/')
-class UserList(Resource):
-    """
-    Users
-    """
-
-    #@jwt_required
-    @API.marshal_list_with(USER_GET)
-    # pylint: disable=R0201
-    def get(self):
-        """
-        Get a list of all lendings currently in the system
-        """
-        return User.query.all()
-
 
 HISTORY_NS = API.namespace('history', description='History', path='/history')
 

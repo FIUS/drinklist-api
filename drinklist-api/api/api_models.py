@@ -3,8 +3,8 @@ Module containing models for whole API to use.
 """
 
 from flask_restplus import fields
-from .api import API
-from .db_models import STD_STRING_SIZE
+from . import API
+from ..db_models import STD_STRING_SIZE
 
 __all__ = ['ROOT_MODEL', 'BEVERAGE_POST', 'BEVERAGE_GET', 'USER_POST', 'USER_GET', 'HISTORY_GET']
 
