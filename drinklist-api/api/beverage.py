@@ -1,5 +1,6 @@
 from flask import request
 from flask_restplus import Api, Resource, abort, marshal
+from sqlalchemy.exc import IntegrityError
 
 from . import API
 from .api_models import BEVERAGE_GET
@@ -30,16 +31,23 @@ class BeverageList(Resource):
     #@jwt_required
     #@satisfies_role(UserRole.ADMIN)
     @BEVERAGE_NS.doc(model=BEVERAGE_GET, body=BEVERAGE_POST)
-    @BEVERAGE_NS.response(404, 'Requested item tag not found!')
+    @BEVERAGE_NS.response(409, 'Name is not unique!')
+    @BEVERAGE_NS.response(201, 'Created.')
     # pylint: disable=R0201
     def post(self):
         """
         Add a new beverage to the database
         """
         new = Beverage(**request.get_json())
-        DB.session.add(new)
-        DB.session.commit()
-        return marshal(new, BEVERAGE_GET), 201
+        try:
+            DB.session.add(new)
+            DB.session.commit()
+            return marshal(new, BEVERAGE_GET), 201
+        except IntegrityError as err:
+            message = str(err)
+            if 'UNIQUE constraint failed' in message:
+                abort(409, 'Name is not unique!')
+            abort(500)
 
 @BEVERAGE_NS.route('/<int:beverage_id>/')
 class UserDetail(Resource):
@@ -52,18 +60,18 @@ class UserDetail(Resource):
     # pylint: disable=R0201
     def get(self, beverage_id):
         """
-        Get the details of a single user
+        Get the details of a single beverage
         """
         return Beverage.query.filter(Beverage.id == beverage_id).first()
 
    #@jwt_required
     #@satisfies_role(UserRole.ADMIN)
     @BEVERAGE_NS.doc(model=BEVERAGE_GET, body=BEVERAGE_PUT)
-    @BEVERAGE_NS.response(404, 'Requested item tag not found!')
+    @BEVERAGE_NS.response(404, 'Requested beverage not found!')
     # pylint: disable=R0201
     def put(self, beverage_id):
         """
-        Update a single user
+        Update a single beverage
         """
         beverage = Beverage.query.filter(Beverage.id == beverage_id).first()
 
