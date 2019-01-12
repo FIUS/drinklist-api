@@ -11,7 +11,6 @@ from .transaction import Transaction
 
 __all__ = [ 'TransactionBeverage', ]
 
-
 class TransactionBeverage(DB.Model):
     """
     The representation of a TransactionBeverage Entry
@@ -24,11 +23,11 @@ class TransactionBeverage(DB.Model):
     count = DB.Column(DB.Integer, nullable=True)
     price = DB.Column(DB.Integer, nullable=True)
 
-    transaction = DB.relationship(Transaction, lazy='select', backref=DB.backref('_beverages', lazy='joined'))
+    transaction = DB.relationship(Transaction, lazy='select', backref=DB.backref('beverages', lazy='joined'))
     beverage = DB.relationship(Beverage, lazy='joined')
 
-    def __init__(self):
-        self.transaction = None
-        self.beverage = None
-        self.beverage_count = None
-        self.price = None
+    def __init__(self, transaction: Transaction, beverage: Beverage, count: int, price: int):
+        self.transaction = transaction
+        self.beverage = beverage
+        self.beverage_count = count
+        self.price = price
