@@ -63,7 +63,7 @@ class TransactionList(Resource):
             abort(404, 'Specified User does not exist!')
         new_transaction = Transaction(user, request.get_json()['amount'], request.get_json()['reason'])
         beverages = request.get_json()['beverages']
-        if (beverages is None or len(beverages) == 0):
+        if (get_jwt_claims() < UserRole.ADMIN and (beverages is None or len(beverages) == 0)):
             abort(400, 'Only Admin are allowed to handle Transactions without beverages!')
         if (beverages is None or len(beverages) == 0) and (request.get_json()['amount'] == 0):
             abort(400, 'Either amount or beverages has to be set!')
@@ -82,7 +82,7 @@ class TransactionList(Resource):
                 DB.session.add(new_beverage)
             if not (beverages is None or len(beverages) == 0):
                 new_transaction.amount = new_amount
-            user.balance += new_amount
+            user.balance += new_transaction.amount
             DB.session.commit()
             return marshal(new_transaction, TRANSACTION_GET), 201
         except IntegrityError as err:
@@ -118,6 +118,7 @@ class UserDetail(Resource):
     @jwt_required
     @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @USER_NS.doc(model=TRANSACTION_GET, body=TRANSACTION_DELETE)
+    @USER_NS.response(400, 'Only Admin are allowed to handle Transactions without beverages!')
     @USER_NS.response(404, 'Specified User does not exist!')
     @USER_NS.response(404, 'Specified Transaction does not exist for this User!')
     @USER_NS.response(409, 'Name is not unique!')
@@ -136,6 +137,8 @@ class UserDetail(Resource):
         transaction = Transaction.query.join(User).filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
         if transaction is None:
             abort(404, 'Specified Transaction does not exist for this User!')
+        if (get_jwt_claims() < UserRole.ADMIN and (transaction.beverages is None or len(transaction.beverages) == 0)):
+            abort(400, 'Only Admin are allowed to handle Transactions without beverages!')
         if(get_jwt_claims() < UserRole.ADMIN and time.time() > transaction.timestamp + 5 * 60): #Admins can always revert
             abort(400, 'Chosen Transaction is too old to be reverted!')
         else:
