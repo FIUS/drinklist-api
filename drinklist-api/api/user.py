@@ -1,13 +1,16 @@
 from flask import request
 from flask_restplus import Api, Resource, abort, marshal
+from flask_jwt_extended import jwt_required
 
 from sqlalchemy.exc import IntegrityError
 
-from . import API
+
+from . import API, satisfies_role
 from .api_models import USER_GET, USER_PUT
 
 from .. import DB
 from ..db_models.user import User
+from ..login import UserRole
 
 
 USER_NS = API.namespace('users', description='Users', path='/users')
@@ -18,8 +21,8 @@ class UserList(Resource):
     The list of all Users
     """
 
-    #@jwt_required
-    #@satisfies_role(UserRole.ADMIN)
+    @jwt_required
+    @satisfies_role(UserRole.KIOSK_USER)
     @API.marshal_list_with(USER_GET)
     # pylint: disable=R0201
     def get(self):
@@ -34,7 +37,8 @@ class UserDetail(Resource):
     A single user
     """
 
-    #@jwt_required
+    @jwt_required
+    @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @API.marshal_with(USER_GET)
     @USER_NS.response(404, 'Specified User does not exist!')
     # pylint: disable=R0201
@@ -47,8 +51,8 @@ class UserDetail(Resource):
             abort(404, 'Specified User does not exist!')
         return user
         
-    #@jwt_required
-    #@satisfies_role(UserRole.ADMIN)
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @USER_NS.doc(model=USER_GET, body=USER_PUT)
     @USER_NS.response(404, 'Specified User does not exist!')
     # pylint: disable=R0201
