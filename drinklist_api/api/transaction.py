@@ -129,7 +129,6 @@ class UserDetail(Resource):
         """
         Revert specified transaction in the database (adds a revertTransaction)
         """
-        new_amount = 0
         user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'Specified User does not exist!')
@@ -152,11 +151,9 @@ class UserDetail(Resource):
                 for beverage in beverages:
                     reversed_beverage = TransactionBeverage(reverse_transaction, beverage.beverage, -(beverage.count), beverage.price)
                     DB.session.add(reversed_beverage)
-                    new_amount += reversed_beverage.count*reversed_beverage.price
                     refered_beverage = Beverage.query.filter(Beverage.id == beverage.beverage_id).first()
                     refered_beverage.stock += reversed_beverage.count
-                reverse_transaction.amount = new_amount
-                user.balance += new_amount
+                user.balance += reverse_transaction.amount
                 DB.session.commit()
                 return marshal(reverse_transaction, TRANSACTION_GET), 201
             except IntegrityError as err:
