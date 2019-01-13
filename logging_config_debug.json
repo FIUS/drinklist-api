@@ -1,0 +1,18 @@
+{
+    "loggers": {
+        "flask.app.auth": {
+            "level": 10
+        },
+        "flask.app.db": {
+            "level": 10
+        },
+        "sqlalchemy.engine": {
+            "level": 30,
+            "propagate": false,
+            "handlers": ["query"]
+        }
+    },
+    "root": {
+        "handlers": ["default", "console"]
+    }
+}
