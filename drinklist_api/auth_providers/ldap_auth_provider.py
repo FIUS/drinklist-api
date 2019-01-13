@@ -32,9 +32,9 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
 
     server: Server = None
 
-    admins: List[str]
-    kiosk_users: List[str]
-    consumers: List[str]
+    admins: List[str] = []
+    kiosk_users: List[str] = []
+    consumers: List[str] = []
 
     def __init__(self):
         self.ldap_uri: str = APP.config["LDAP_URI"] #The URL of the ldpa server
@@ -128,13 +128,13 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                     consumer_group_filter = "(&" + all_consumer_groups_filter + group_base_filter + ")"
 
                 in_consumer_user_filter = conn.search(self.user_search_base,
-                                                   consumer_user_filter,
-                                                   search_scope=SUBTREE)
+                                                      consumer_user_filter,
+                                                      search_scope=SUBTREE)
                 in_consumer_group_filter = conn.search(self.group_search_base,
-                                                    consumer_group_filter,
-                                                    search_scope=SUBTREE)
+                                                       consumer_group_filter,
+                                                       search_scope=SUBTREE)
                 if (in_consumer_user_filter and in_consumer_group_filter):
-                    self.consumers.add(user_id)
+                    self.consumers.append(user_id)
 
                 kiosk_user_user_filter = user_base_filter
                 all_kiosk_user_users_filter = self.combine_filters([self.kiosk_user_filter])
@@ -147,13 +147,13 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                     kiosk_user_group_filter = "(&" + all_kiosk_user_groups_filter + group_base_filter + ")"
 
                 in_kiosk_user_user_filter = conn.search(self.user_search_base,
-                                                   kiosk_user_user_filter,
-                                                   search_scope=SUBTREE)
+                                                        kiosk_user_user_filter,
+                                                        search_scope=SUBTREE)
                 in_kiosk_user_group_filter = conn.search(self.group_search_base,
-                                                    kiosk_user_group_filter,
-                                                    search_scope=SUBTREE)
+                                                         kiosk_user_group_filter,
+                                                         search_scope=SUBTREE)
                 if (in_kiosk_user_user_filter and in_kiosk_user_group_filter):
-                    self.kiosk_users.add(user_id)
+                    self.kiosk_users.append(user_id)
 
                 admin_user_filter = user_base_filter
                 all_admin_users_filter = self.combine_filters([self.admin_filter])
@@ -172,12 +172,12 @@ class LDAPAuthProvider(LoginProvider, provider_name="LDAP"):
                                                     admin_group_filter,
                                                     search_scope=SUBTREE)
                 if (in_admin_user_filter and in_admin_group_filter):
-                    self.admins.add(user_id)
+                    self.admins.append(user_id)
 
                 AUTH_LOGGER.debug('Valid login from user %s. '
                                   'User in consumer user filter: %s. User in consumer group: %s. '
                                   'User in kiosk_user user filter: %s. User in kiosk_user group: %s. '
-                                  'User in admin filter: %s. User in admin group: %s"', 
+                                  'User in admin filter: %s. User in admin group: %s"',
                                   user_id,
                                   str(in_consumer_user_filter), str(in_consumer_group_filter),
                                   str(in_kiosk_user_user_filter), str(in_kiosk_user_group_filter),
