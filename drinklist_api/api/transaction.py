@@ -139,7 +139,10 @@ class UserDetail(Resource):
         if(time.time() > transaction.timestamp + 5 * 60):
             abort(400, 'Chosen Transaction is too old to be reverted!')
         else:
-            reverse_transaction = Transaction(transaction.user, -transaction.amount, reason, transaction)
+            old_transaction = transaction
+            if transaction.cancels is not None:
+                old_transaction = None
+            reverse_transaction = Transaction(transaction.user, -transaction.amount, reason, old_transaction)
             beverages = transaction.beverages
             try:
                 DB.session.add(reverse_transaction)
