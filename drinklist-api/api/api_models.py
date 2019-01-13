@@ -46,7 +46,7 @@ USER_GET = API.inherit('UserGET', USER_PUT, {
 TRANSACTION_BEVERAGE_GET = API.model('TransactionBeverageGET', {
     'beverage': fields.Nested(BEVERAGE_GET),
     'count': fields.Integer(min=1, example=1, title='Count of beverages'),
-    'price': fields.Float(title='Price of beverage'),
+    'price': fields.Float(title='Price of beverage', readonly=True),
 })
 
 TRANSACTION_POST = API.model('TransactionPOST', {
