@@ -57,7 +57,7 @@ TRANSACTION_POST = API.model('TransactionPOST', {
 
 TRANSACTION_GET_NOCHILD = API.inherit('TransactionNoChildGET', TRANSACTION_POST, {
     'id': fields.Integer(),
-    'timestamp': fields.DateTime(),
+    'timestamp': fields.Integer(),
 })
 
 TRANSACTION_GET = API.inherit('TransactionGET', TRANSACTION_GET_NOCHILD, {

@@ -2,9 +2,10 @@
 Module containing database models for everything concerning Transaction entries.
 """
 
+import time
+
 from sqlalchemy.sql import func
 from typing import List
-
 
 from .. import DB
 from . import STD_STRING_SIZE
@@ -25,7 +26,7 @@ class Transaction(DB.Model):
     amount = DB.Column(DB.Integer, nullable=True)
     reason = DB.Column(DB.Text, nullable=True)
     cancels_id = DB.Column(DB.Integer, DB.ForeignKey(id), nullable=True)
-    timestamp = DB.Column(DB.DateTime, server_default=func.now())
+    timestamp = DB.Column(DB.Integer)
 
     user = DB.relationship(User, lazy='joined')
     cancels = DB.relationship('Transaction', single_parent=True, uselist=False, lazy='joined')
@@ -35,5 +36,6 @@ class Transaction(DB.Model):
         self.amount = amount
         self.reason = reason
         self.cancels = cancels
+        self.timestamp = int(time.time())
 
 

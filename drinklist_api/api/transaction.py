@@ -1,5 +1,4 @@
-from datetime import datetime
-from datetime import timedelta
+import time
 from flask import request
 from flask_restplus import Api, Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
@@ -137,8 +136,7 @@ class UserDetail(Resource):
         transaction = Transaction.query.join(User).filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
         if transaction is None:
             abort(404, 'Specified Transaction does not exist for this User!')
-        if False:
-        #if(datetime.now() > transaction.timestamp + timedelta(minutes=5)):
+        if(time.time() > transaction.timestamp + 5 * 60):
             abort(400, 'Chosen Transaction is too old to be reverted!')
         else:
             reverse_transaction = Transaction(transaction.user, -transaction.amount, reason, transaction)
