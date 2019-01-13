@@ -119,6 +119,7 @@ class UserDetail(Resource):
     @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @USER_NS.doc(model=TRANSACTION_GET, body=TRANSACTION_DELETE)
     @USER_NS.response(400, 'Only Admin are allowed to handle Transactions without beverages!')
+    @USER_NS.response(403, 'It is not allowed to cancel a transaction multipletimes, the transaction is already cancelled!')
     @USER_NS.response(404, 'Specified User does not exist!')
     @USER_NS.response(404, 'Specified Transaction does not exist for this User!')
     @USER_NS.response(409, 'Name is not unique!')
@@ -134,6 +135,10 @@ class UserDetail(Resource):
             abort(404, 'Specified User does not exist!')
         reason = request.get_json()['reason']
         transaction = Transaction.query.join(User).filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
+        already_canceled = Transaction.query.filter(Transaction.cancels == Transaction.query.filter(Transaction.id == transaction_id).first()).first()
+        print(already_canceled)
+        if already_canceled:
+            abort(403, 'It is not allowed to cancel a transaction multipletimes, the transaction is already cancelled!')
         if transaction is None:
             abort(404, 'Specified Transaction does not exist for this User!')
         if (get_jwt_claims() < UserRole.ADMIN and (transaction.beverages is None or len(transaction.beverages) == 0)):
