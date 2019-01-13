@@ -36,17 +36,21 @@ class UserDetail(Resource):
 
     #@jwt_required
     @API.marshal_with(USER_GET)
+    @USER_NS.response(404, 'Specified User does not exist!')
     # pylint: disable=R0201
     def get(self, user_name: str):
         """
         Get the details of a single user
         """
-        return User.query.filter(User.name == user_name).first()
-    
+        user = User.query.filter(User.name == user_name).first()
+        if user is None:
+            abort(404, 'Specified User does not exist!')
+        return user
+        
     #@jwt_required
     #@satisfies_role(UserRole.ADMIN)
     @USER_NS.doc(model=USER_GET, body=USER_PUT)
-    @USER_NS.response(404, 'Requested item tag not found!')
+    @USER_NS.response(404, 'Specified User does not exist!')
     # pylint: disable=R0201
     def put(self, user_name: str):
         """
@@ -55,7 +59,7 @@ class UserDetail(Resource):
         user = User.query.filter(User.name == user_name).first()
 
         if user is None:
-            abort(404, 'Requested item tag not found!')
+            abort(404, 'Specified User does not exist!')
 
         user.update(**request.get_json())
         DB.session.commit()
