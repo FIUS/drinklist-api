@@ -25,3 +25,5 @@ class User(DB.Model):
         self.active = active
         self.balance = balance
 
+    def update(self, active:bool):
+        self.active = active
