@@ -137,7 +137,8 @@ class UserDetail(Resource):
         transaction = Transaction.query.join(User).filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
         if transaction is None:
             abort(404, 'Specified Transaction does not exist for this User!')
-        if(datetime.now() > transaction.timestamp + timedelta(minutes=5)):
+        if False:
+        #if(datetime.now() > transaction.timestamp + timedelta(minutes=5)):
             abort(400, 'Chosen Transaction is too old to be reverted!')
         else:
             reverse_transaction = Transaction(transaction.user, -transaction.amount, reason, transaction)
@@ -148,7 +149,7 @@ class UserDetail(Resource):
                     reversed_beverage = TransactionBeverage(reverse_transaction, beverage.beverage, -(beverage.count), beverage.price)
                     DB.session.add(reversed_beverage)
                     new_amount += reversed_beverage.count*reversed_beverage.price
-                    refered_beverage = Beverage.query.filter(Beverage.id == reversed_beverage.beverage_id).first()
+                    refered_beverage = Beverage.query.filter(Beverage.id == beverage.beverage_id).first()
                     refered_beverage.stock -= reversed_beverage.count
                 reverse_transaction.amount = new_amount
                 user.balance += new_amount
