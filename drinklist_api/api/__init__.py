@@ -71,10 +71,11 @@ def render_root(self):
     return self.make_response(marshal({}, ROOT_MODEL), 200)
 
 Api.render_root = render_root
+Api.base_path = APP.config['URI_BASE_PATH']
 
 API = Api(API_BLUEPRINT, version='0.1', title='Drinklist API', doc='/doc/',
           authorizations=AUTHORIZATIONS, security='jwt',
-          description='API for the new FIUS Drinklist.')
+          description='API for the new FIUS Drinklist.', endpoint=APP.config['URI_BASE_PATH'])
 
 # pylint: disable=C0413
 from .api_models import ROOT_MODEL, TRANSACTION_GET
