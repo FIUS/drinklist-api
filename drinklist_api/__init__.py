@@ -1,6 +1,5 @@
 from os import environ
 from logging import Logger, getLogger
-from logging.config import dictConfig
 
 from flask import Flask, logging
 from flask_sqlalchemy import SQLAlchemy
@@ -28,11 +27,7 @@ CONFIG_KEYS = ('SQLALCHEMY_DATABASE_URI', 'JWT_SECRET_KEY')
 for env_var in CONFIG_KEYS:
     APP.config[env_var] = environ.get(env_var, APP.config.get(env_var))
 
-dictConfig(APP.config['LOGGING'])
-
-APP.logger: Logger
-APP.logger.debug('Debug logging enabled')
-APP.logger.info('Connecting to database %s.', APP.config['SQLALCHEMY_DATABASE_URI'])
+from . import loggingInit
 
 AUTH_LOGGER = getLogger('flask.app.auth')  # type: Logger
 
@@ -61,7 +56,3 @@ from . import db_models
 # pylint: disable=C0413
 from . import routes
 
-
-
-if APP.config.get('DEBUG', False):
-    from . import debug_routes

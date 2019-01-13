@@ -37,67 +37,7 @@ class Config(object):
     LDAP_KIOSK_USER_GROUP_FILTER = ""
     LDAP_ADMIN_GROUP_FILTER = ""
 
-    LOGGING = {
-        'version': 1,
-        'formatters': {
-            'extended': {
-                'format': '%(asctime)s [%(levelname)s] [%(name)-16s] %(message)s <%(module)s, \
-                %(funcName)s, %(lineno)s; %(pathname)s>',
-            },
-            'short': {
-                'format': '[%(asctime)s] [%(levelname)s] [%(name)-16s] %(message)s',
-            }
-        },
-        'handlers': {
-            'default': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'formatter': 'extended',
-                'filename': '/tmp/drinklist-api-default.log',
-                'maxBytes': 104857600,
-                'backupCount': 10,
-            },
-            'auth': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'formatter': 'short',
-                'filename': '/tmp/drinklist-api-auth.log',
-                'maxBytes': 104857600,
-                'backupCount': 10,
-            },
-            'query': {
-                'class': 'logging.handlers.RotatingFileHandler',
-                'formatter': 'short',
-                'filename': '/tmp/drinklist-api-querys.log',
-                'maxBytes': 104857600,
-                'backupCount': 2,
-            },
-            'console': {
-                'class' : 'logging.StreamHandler',
-                'formatter': 'extended',
-            }
-        },
-        'loggers': {
-            'flask.app.auth': {
-                'level': logging.INFO,
-                'propagate': False,
-                'handlers': ['auth'],
-            },
-            'flask.app.db': {
-                'level': logging.WARNING,
-                'propagate': False,
-                'handlers': ['query'],
-            },
-            'sqlalchemy': {
-                'level': logging.WARNING,
-                'propagate': False,
-                'handlers': ['query'],
-            },
-        },
-        'root': {
-            'level': logging.WARNING,
-            'handlers': ['default'],
-        },
-        'disable_existing_loggers': True,
-    }
+    LOGGING_CONFIGS = ['logging_config.json']
 
     JSON_SORT_KEYS = False
     JSONIFY_PRETTYPRINT_REGULAR = False
@@ -123,14 +63,7 @@ class DebugConfig(Config):
     BASIC_AUTH_KIOSK = ["kiosk"]
     BASIC_AUTH_USER = ["user1", "user2"]
 
-    Config.LOGGING['loggers']['flask.app.auth']['level'] = logging.DEBUG
-    Config.LOGGING['loggers']['flask.app.db']['level'] = logging.DEBUG
-    Config.LOGGING['loggers']['sqlalchemy.engine'] = {
-        'level': logging.WARN,
-        'propagate': False,
-        'handlers': ['query'],
-    }
-    Config.LOGGING['root']['handlers'].append('console')
+    LOGGING_CONFIGS = ['logging_config.json', 'logging_config_debug.json']
 
 class TestingConfig(Config):
     TESTING = True
