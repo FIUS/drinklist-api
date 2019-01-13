@@ -46,7 +46,7 @@ class UserDetail(Resource):
         if user is None:
             abort(404, 'Specified User does not exist!')
         return user
-
+        
     #@jwt_required
     #@satisfies_role(UserRole.ADMIN)
     @USER_NS.doc(model=USER_GET, body=USER_PUT)
