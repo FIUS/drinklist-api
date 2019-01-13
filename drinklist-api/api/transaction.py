@@ -40,7 +40,7 @@ class TransactionList(Resource):
         user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'Requested User does not exist!')
-        return Transaction.query.filter(Transaction.user_id == user_name).all()
+        return Transaction.query.filter(Transaction.user_id == user.id).all()
 
     @jwt_required
     @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
@@ -55,6 +55,7 @@ class TransactionList(Resource):
         Add a new transaction to the database
         """
         #TODO: Only admin may have transactions without beverages.
+        new_amount = 0
         user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'Spezified User does not exist!')
@@ -67,8 +68,11 @@ class TransactionList(Resource):
                 refered_beverage = Beverage.query.filter(Beverage.id == refered_beverage_id).first()
                 if refered_beverage is None:
                     abort(400, 'Specified beverage does not exist')
-                new_beverage = TransactionBeverage(new_transaction, refered_beverage, beverage['count'], beverage['price'])
+                new_beverage = TransactionBeverage(new_transaction, refered_beverage, beverage['count'], refered_beverage.price)
+                new_amount += beverage['count']*refered_beverage.price
                 DB.session.add(new_beverage)
+            new_transaction.amount = new_amount
+            user.balance += new_amount
             DB.session.commit()
             return marshal(new_transaction, TRANSACTION_GET), 201
         except IntegrityError as err:
@@ -115,6 +119,7 @@ class UserDetail(Resource):
         """
         Revert specified transaction in the database (adds a revertTransaction)
         """
+        new_amount = 0
         user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'Specified User does not exist!')
@@ -135,6 +140,9 @@ class UserDetail(Resource):
                 for beverage in beverages:
                     reversed_beverage = TransactionBeverage(reverse_transaction, beverage.beverage, -(beverage.count), beverage.price)
                     DB.session.add(reversed_beverage)
+                    new_amount += reversed_beverage.count*reversed_beverage.price
+                reverse_transaction.amount = new_amount
+                user.balance += new_amount
                 DB.session.commit()
                 return marshal(reverse_transaction, TRANSACTION_GET), 201
             except IntegrityError as err:
