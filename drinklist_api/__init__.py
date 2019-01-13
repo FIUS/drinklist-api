@@ -29,6 +29,7 @@ for env_var in CONFIG_KEYS:
 
 from . import loggingInit
 
+APP.logger # type: Logger
 AUTH_LOGGER = getLogger('flask.app.auth')  # type: Logger
 
 # Setup DB with Migrations and bcrypt
