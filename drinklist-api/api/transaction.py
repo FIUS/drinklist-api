@@ -45,6 +45,8 @@ class TransactionList(Resource):
     @jwt_required
     @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @USER_NS.doc(model=TRANSACTION_GET, body=TRANSACTION_POST)
+    @USER_NS.response(400, 'Either amount or beverages has to be set!')
+    @USER_NS.response(400, 'Only either amount or beverages have to be set!')
     @USER_NS.response(400, 'Specified beverage does not exist')
     @USER_NS.response(404, 'Specified User does not exist!')
     @USER_NS.response(409, 'Name is not unique!')
@@ -58,9 +60,13 @@ class TransactionList(Resource):
         new_amount = 0
         user = User.query.filter(User.name == user_name).first()
         if user is None:
-            abort(404, 'Spezified User does not exist!')
+            abort(404, 'Specified User does not exist!')
         new_transaction = Transaction(user, request.get_json()['amount'], request.get_json()['reason'])
         beverages = request.get_json()['beverages']
+        if (beverages is None or len(beverages) == 0) and (request.get_json()['amount'] == 0):
+            abort(400, 'Either amount or beverages has to be set!')
+        if (not (beverages is None or len(beverages) == 0)) and (not (request.get_json()['amount'] == 0)):
+            abort(400, 'Only either amount or beverages have to be set!')
         try:
             DB.session.add(new_transaction)
             for beverage in beverages:
@@ -71,7 +77,8 @@ class TransactionList(Resource):
                 new_beverage = TransactionBeverage(new_transaction, refered_beverage, beverage['count'], refered_beverage.price)
                 new_amount += beverage['count']*refered_beverage.price
                 DB.session.add(new_beverage)
-            new_transaction.amount = new_amount
+            if not (beverages is None or len(beverages) == 0):
+                new_transaction.amount = new_amount
             user.balance += new_amount
             DB.session.commit()
             return marshal(new_transaction, TRANSACTION_GET), 201
@@ -80,7 +87,6 @@ class TransactionList(Resource):
             if APP.config['DB_UNIQUE_CONSTRAIN_FAIL'] in message:
                 abort(409, 'Name is not unique!')
             abort(500)
-
 
 @USER_NS.route('/<string:user_name>/transactions/<int:transaction_id>')
 class UserDetail(Resource):
