@@ -45,6 +45,7 @@ class TransactionList(Resource):
     @jwt_required
     @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @USER_NS.doc(model=TRANSACTION_GET, body=TRANSACTION_POST)
+    @USER_NS.response(400, 'Only Admin are allowed to handle Transactions without beverages!')
     @USER_NS.response(400, 'Either amount or beverages has to be set!')
     @USER_NS.response(400, 'Only either amount or beverages have to be set!')
     @USER_NS.response(400, 'Specified beverage does not exist')
@@ -56,13 +57,14 @@ class TransactionList(Resource):
         """
         Add a new transaction to the database
         """
-        #TODO: Only admin may have transactions without beverages.
         new_amount = 0
         user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'Specified User does not exist!')
         new_transaction = Transaction(user, request.get_json()['amount'], request.get_json()['reason'])
         beverages = request.get_json()['beverages']
+        if (beverages is None or len(beverages) == 0):
+            abort(400, 'Only Admin are allowed to handle Transactions without beverages!')
         if (beverages is None or len(beverages) == 0) and (request.get_json()['amount'] == 0):
             abort(400, 'Either amount or beverages has to be set!')
         if (not (beverages is None or len(beverages) == 0)) and (not (request.get_json()['amount'] == 0)):
