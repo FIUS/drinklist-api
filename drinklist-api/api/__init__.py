@@ -5,7 +5,7 @@ from typing import List
 from functools import wraps
 from flask import Blueprint
 from flask_restplus import Api, Resource, abort, marshal
-from flask_jwt_extended import jwt_required, jwt_optional, get_jwt_claims
+from flask_jwt_extended import jwt_required, jwt_optional, get_jwt_claims, get_jwt_identity
 from flask_jwt_extended.exceptions import NoAuthorizationError
 from jwt import ExpiredSignatureError, InvalidTokenError
 
@@ -29,7 +29,7 @@ AUTHORIZATIONS = {
     }
 }
 
-def satisfies_role(role: UserRole):
+def satisfies_role(role: UserRole, user_self_allowed: bool = False):
     """
     Check if the requesting user has one of the given roles.
 
@@ -46,7 +46,16 @@ def satisfies_role(role: UserRole):
             Wrapper function
             """
             role_claims = get_jwt_claims()
+            if user_self_allowed:
+                name = get_jwt_identity()
+                if name is not None and kwargs['user_name'] == name:
+                    return func(*args, **kwargs)
+
             if role > role_claims:
+                if user_self_allowed:
+                    AUTH_LOGGER.debug('Access to ressource with isufficient rights. User %s with role %s wants to'
+                                      'access data of user %s and would require role %s',
+                                      name, UserRole(role_claims), kwargs['user_name'], role)
                 AUTH_LOGGER.debug('Access to ressource with isufficient rights. User role: %s, required role: %s',
                                   UserRole(role_claims), role)
                 abort(403, 'Only users with {} privileges have access to this resource.'.format(role.name))
@@ -161,7 +170,7 @@ def log_unauthorized(message):
     """
     Logs unauthorized access
     """
-    pass  #AUTH_LOGGER.debug('Unauthorized access: %s', message)
+    AUTH_LOGGER.debug('Unauthorized access: %s', message)
 
 
 APP.register_blueprint(API_BLUEPRINT, url_prefix='')

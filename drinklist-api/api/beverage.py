@@ -3,13 +3,17 @@ from flask_restplus import Api, Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 
 from . import API
-from . import APP
+from . import APP, satisfies_role
 from .api_models import BEVERAGE_GET
 from .api_models import BEVERAGE_POST
 from .api_models import BEVERAGE_PUT
 
+from flask_jwt_extended import jwt_required
+
 from .. import DB
 from ..db_models.beverage import Beverage
+from ..login import UserRole
+
 
 BEVERAGE_NS = API.namespace('beverages', description='Beverages', path='/beverages')
 
@@ -19,8 +23,7 @@ class BeverageList(Resource):
     List of all Beverages
     """
 
-    #@jwt_required
-    #@API.param('active', 'get only active lendings', type=bool, required=False, default=True)
+    @jwt_required
     @API.marshal_list_with(BEVERAGE_GET)
     # pylint: disable=R0201
     def get(self):
@@ -29,8 +32,8 @@ class BeverageList(Resource):
         """
         return Beverage.query.all()
 
-    #@jwt_required
-    #@satisfies_role(UserRole.ADMIN)
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @BEVERAGE_NS.doc(model=BEVERAGE_GET, body=BEVERAGE_POST)
     @BEVERAGE_NS.response(409, 'Name is not unique!')
     @BEVERAGE_NS.response(201, 'Created.')
@@ -56,7 +59,7 @@ class BeverageDetail(Resource):
     A single beverage
     """
 
-    #@jwt_required
+    @jwt_required
     @API.marshal_with(BEVERAGE_GET)
     @BEVERAGE_NS.response(404, 'Specified beverage does not found!')
     # pylint: disable=R0201
@@ -69,8 +72,8 @@ class BeverageDetail(Resource):
             abort(404, 'Specified beverage does not exist!')
         return beverage
 
-   #@jwt_required
-    #@satisfies_role(UserRole.ADMIN)
+    @jwt_required
+    @satisfies_role(UserRole.ADMIN)
     @BEVERAGE_NS.doc(model=BEVERAGE_GET, body=BEVERAGE_PUT)
     @BEVERAGE_NS.response(404, 'Specified beverage not found!')
     # pylint: disable=R0201

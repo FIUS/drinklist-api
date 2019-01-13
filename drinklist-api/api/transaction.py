@@ -3,9 +3,11 @@ from flask import request
 from flask_restplus import Api, Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
+from flask_jwt_extended import jwt_required
+
 
 from . import API
-from . import APP
+from . import APP, satisfies_role
 from .api_models import TRANSACTION_GET
 from .api_models import TRANSACTION_POST
 from .api_models import TRANSACTION_DELETE
@@ -15,6 +17,8 @@ from ..db_models.transaction import Transaction
 from ..db_models.user import User
 from ..db_models.transaction_beverage import TransactionBeverage
 from ..db_models.beverage import Beverage
+from ..login import UserRole
+
 
 USER_NS = API.namespace('users', description='Users', path='/users')
 
@@ -24,8 +28,8 @@ class TransactionList(Resource):
     List of all Transactions
     """
    
-    #@jwt_required
-    #@API.param('active', 'get only active lendings', type=bool, required=False, default=True)
+    @jwt_required
+    @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @API.marshal_list_with(TRANSACTION_GET)
     @USER_NS.response(404, 'Requested User does not exist!')
     # pylint: disable=R0201
@@ -38,8 +42,8 @@ class TransactionList(Resource):
             abort(404, 'Requested User does not exist!')
         return Transaction.query.filter(Transaction.user_id == user_name).all()
 
-    #@jwt_required
-    #@satisfies_role(UserRole.ADMIN)
+    @jwt_required
+    @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @USER_NS.doc(model=TRANSACTION_GET, body=TRANSACTION_POST)
     @USER_NS.response(400, 'Specified beverage does not exist')
     @USER_NS.response(404, 'Specified User does not exist!')
@@ -50,6 +54,7 @@ class TransactionList(Resource):
         """
         Add a new transaction to the database
         """
+        #TODO: Only admin may have transactions without beverages.
         user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'Spezified User does not exist!')
@@ -79,7 +84,8 @@ class UserDetail(Resource):
     A single transaction
     """
 
-    #@jwt_required
+    @jwt_required
+    @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @API.marshal_with(TRANSACTION_GET)
     @USER_NS.response(404, 'Specified User does not exist!')
     @USER_NS.response(404, 'Specified Transaction does not exist for this User!')
@@ -88,17 +94,16 @@ class UserDetail(Resource):
         """
         Get the details of a single transaction
         """
-        #TODO check if the user is involved with that transaction otherwise 404
         user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'Specified User does not exist!')
-        transaction = Transaction.query.filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
+        transaction = Transaction.query.join(User).filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
         if transaction is None:
             abort(404, 'Specified Transaction does not exist for this User!')
         return transaction
 
-    #@jwt_required
-    #@satisfies_role(UserRole.ADMIN)
+    @jwt_required
+    @satisfies_role(UserRole.KIOSK_USER, user_self_allowed=True)
     @USER_NS.doc(model=TRANSACTION_GET, body=TRANSACTION_DELETE)
     @USER_NS.response(404, 'Specified User does not exist!')
     @USER_NS.response(404, 'Specified Transaction does not exist for this User!')
@@ -110,12 +115,11 @@ class UserDetail(Resource):
         """
         Revert specified transaction in the database (adds a revertTransaction)
         """
-        #TODO check if the user is involved with that transaction otherwise 404
         user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'Specified User does not exist!')
         reason = request.get_json()['reason']
-        transaction = Transaction.query.filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
+        transaction = Transaction.query.join(User).filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
         if transaction is None:
             abort(404, 'Specified Transaction does not exist for this User!')
         #TODO timestamp bei >func.now()+5 min

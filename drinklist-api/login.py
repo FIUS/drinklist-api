@@ -14,7 +14,7 @@ class UserRole(IntEnum):
     """
 
     USER = 1
-    KISOK_USER = 2
+    KIOSK_USER = 2
     ADMIN = 3
 
 # pylint: disable=R0903
@@ -156,7 +156,7 @@ class LoginService():
                 if provider.is_admin(user):
                     user_obj.role = UserRole.ADMIN
                 elif provider.is_kiosk_user(user):
-                    user_obj.role = UserRole.KIOSK
+                    user_obj.role = UserRole.KIOSK_USER
                 
                 if provider.is_consuming_user(user):
                     db_user = User.query.filter(User.name == user).first()
