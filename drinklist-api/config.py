@@ -16,10 +16,25 @@ class Config(object):
 
     LOGIN_PROVIDERS = ['Basic']
 
+    LDAP_URI = ""
+    LDAP_PORT = 0
+    LDAP_SSL = False
+    LDAP_START_TLS = False
+    LDAP_USER_SEARCH_BASE = ""
+    LDAP_GROUP_SEARCH_BASE = ""
+    LDAP_USER_RDN = ""
+    LDAP_USER_UID_FIELD = ""
+    LDAP_GROUP_MEMBERSHIP_FIELD = ""
+    LDAP_CONSUMER_FILTER = ""
+    LDAP_KIOSK_USER_FILTER = ""
+    LDAP_ADMIN_FILTER = ""
+    LDAP_CONSUMER_GROUP_FILTER = ""
+    LDAP_KIOSK_USER_GROUP_FILTER = ""
+    LDAP_ADMIN_GROUP_FILTER = ""
+
     JSON_SORT_KEYS = False
     JSONIFY_PRETTYPRINT_REGULAR = False
     RESTPLUS_JSON = {'indent': None}
-
 
 class ProductionConfig(Config):
     pass
