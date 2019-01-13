@@ -3,7 +3,7 @@ from flask import request
 from flask_restplus import Api, Resource, abort, marshal
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.sql import func
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_claims
 
 
 from . import API
@@ -136,10 +136,13 @@ class UserDetail(Resource):
         transaction = Transaction.query.join(User).filter(Transaction.id == transaction_id).filter(User.name == user_name).first()
         if transaction is None:
             abort(404, 'Specified Transaction does not exist for this User!')
-        if(time.time() > transaction.timestamp + 5 * 60):
+        if(get_jwt_claims() < UserRole.ADMIN and time.time() > transaction.timestamp + 5 * 60): #Admins can always revert
             abort(400, 'Chosen Transaction is too old to be reverted!')
         else:
-            reverse_transaction = Transaction(transaction.user, -transaction.amount, reason, transaction)
+            old_transaction = transaction
+            if transaction.cancels is not None:
+                old_transaction = None
+            reverse_transaction = Transaction(transaction.user, -transaction.amount, reason, old_transaction)
             beverages = transaction.beverages
             try:
                 DB.session.add(reverse_transaction)
@@ -148,7 +151,7 @@ class UserDetail(Resource):
                     DB.session.add(reversed_beverage)
                     new_amount += reversed_beverage.count*reversed_beverage.price
                     refered_beverage = Beverage.query.filter(Beverage.id == beverage.beverage_id).first()
-                    refered_beverage.stock -= reversed_beverage.count
+                    refered_beverage.stock += reversed_beverage.count
                 reverse_transaction.amount = new_amount
                 user.balance += new_amount
                 DB.session.commit()
