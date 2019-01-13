@@ -18,7 +18,7 @@ from ..db_models.beverage import Beverage
 
 USER_NS = API.namespace('users', description='Users', path='/users')
 
-@USER_NS.route('/<int:user_id>/transactions')
+@USER_NS.route('/<string:user_name>/transactions')
 class TransactionList(Resource):
     """
     List of all Transactions
@@ -28,11 +28,11 @@ class TransactionList(Resource):
     #@API.param('active', 'get only active lendings', type=bool, required=False, default=True)
     @API.marshal_list_with(TRANSACTION_GET)
     # pylint: disable=R0201
-    def get(self, user_id: int):
+    def get(self, user_name: str):
         """
         Get a list of all transactions of the specified user currently in the system
         """
-        return Transaction.query.filter(Transaction.user_id == user_id).all()
+        return Transaction.query.join(User).filter(User.name == user_name).all()
 
     #@jwt_required
     #@satisfies_role(UserRole.ADMIN)
@@ -40,11 +40,11 @@ class TransactionList(Resource):
     @USER_NS.response(409, 'Name is not unique!')
     @USER_NS.response(201, 'Created.')
     # pylint: disable=R0201
-    def post(self, user_id: int):
+    def post(self, user_name: str):
         """
         Add a new transaction to the database
         """
-        user = User.query.filter(User.id == user_id).first()
+        user = User.query.filter(User.name == user_name).first()
         if user is None:
             abort(404, 'invalid user id')
         new_transaction = Transaction(user, request.get_json()['amount'], request.get_json()['reason'])
@@ -67,7 +67,7 @@ class TransactionList(Resource):
             abort(500)
 
 
-@USER_NS.route('/<int:user_id>/transactions/<int:transaction_id>')
+@USER_NS.route('/<string:user_name>/transactions/<int:transaction_id>')
 class UserDetail(Resource):
     """
     A single transaction
@@ -76,10 +76,11 @@ class UserDetail(Resource):
     #@jwt_required
     @API.marshal_with(TRANSACTION_GET)
     # pylint: disable=R0201
-    def get(self, transaction_id: int, user_id: int):
+    def get(self, transaction_id: int, user_name: str):
         """
         Get the details of a single transaction
         """
+        #TODO check if the user is involved with that transaction otherwise 404
         return Transaction.query.filter(Transaction.id == transaction_id).first()
 
     #@jwt_required
@@ -87,10 +88,11 @@ class UserDetail(Resource):
     @USER_NS.doc(model=TRANSACTION_GET, body=TRANSACTION_DELETE)
     @USER_NS.response(410, 'Reverse Deadline not met')
     # pylint: disable=R0201
-    def delete(self, transaction_id: int, user_id: int):
+    def delete(self, transaction_id: int, user_name: str):
         """
         Revert specified transaction in the database (adds a revertTransaction)
         """
+        #TODO check if the user is involved with that transaction otherwise 404
         reason = request.get_json()['reason']
         print(reason)
         transaction = Transaction.query.filter(Transaction.id == transaction_id).first()

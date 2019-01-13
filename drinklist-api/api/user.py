@@ -28,7 +28,7 @@ class UserList(Resource):
         """
         return User.query.all()
 
-@USER_NS.route('/<int:user_id>/')
+@USER_NS.route('/<string:user_name>/')
 class UserDetail(Resource):
     """
     A single user
@@ -37,22 +37,22 @@ class UserDetail(Resource):
     #@jwt_required
     @API.marshal_with(USER_GET)
     # pylint: disable=R0201
-    def get(self, user_id):
+    def get(self, user_name: str):
         """
         Get the details of a single user
         """
-        return User.query.filter(User.id == user_id).first()
+        return User.query.filter(User.name == user_name).first()
     
     #@jwt_required
     #@satisfies_role(UserRole.ADMIN)
     @USER_NS.doc(model=USER_GET, body=USER_PUT)
     @USER_NS.response(404, 'Requested item tag not found!')
     # pylint: disable=R0201
-    def put(self, user_id):
+    def put(self, user_name: str):
         """
         Update a single user
         """
-        user = User.query.filter(User.id == user_id).first()
+        user = User.query.filter(User.name == user_name).first()
 
         if user is None:
             abort(404, 'Requested item tag not found!')
