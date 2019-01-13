@@ -58,17 +58,21 @@ class BeverageDetail(Resource):
 
     #@jwt_required
     @API.marshal_with(BEVERAGE_GET)
+    @BEVERAGE_NS.response(404, 'Specified beverage does not found!')
     # pylint: disable=R0201
     def get(self, beverage_id):
         """
         Get the details of a single beverage
         """
-        return Beverage.query.filter(Beverage.id == beverage_id).first()
+        beverage = Beverage.query.filter(Beverage.id == beverage_id).first()
+        if beverage is None:
+            abort(404, 'Specified beverage does not exist!')
+        return beverage
 
    #@jwt_required
     #@satisfies_role(UserRole.ADMIN)
     @BEVERAGE_NS.doc(model=BEVERAGE_GET, body=BEVERAGE_PUT)
-    @BEVERAGE_NS.response(404, 'Requested beverage not found!')
+    @BEVERAGE_NS.response(404, 'Specified beverage not found!')
     # pylint: disable=R0201
     def put(self, beverage_id):
         """
@@ -77,7 +81,7 @@ class BeverageDetail(Resource):
         beverage = Beverage.query.filter(Beverage.id == beverage_id).first()
 
         if beverage is None:
-            abort(404, 'Requested beverage not found!')
+            abort(404, 'Specified beverage not found!')
 
         beverage.update(**request.get_json())
         DB.session.commit()
