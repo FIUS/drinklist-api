@@ -72,9 +72,9 @@ def render_root(self):
 
 Api.render_root = render_root
 
-API = Api(API_BLUEPRINT, version='0.1', title='TTF API', doc='/doc/',
+API = Api(API_BLUEPRINT, version='0.1', title='Drinklist API', doc='/doc/',
           authorizations=AUTHORIZATIONS, security='jwt',
-          description='API for TTF.')
+          description='API for the new FIUS Drinklist.')
 
 # pylint: disable=C0413
 from .api_models import ROOT_MODEL, TRANSACTION_GET

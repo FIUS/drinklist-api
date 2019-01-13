@@ -23,7 +23,7 @@ from ..login import UserRole
 
 USER_NS = API.namespace('users', description='Users', path='/users')
 
-@USER_NS.route('/<string:user_name>/transactions')
+@USER_NS.route('/<string:user_name>/transactions/')
 class TransactionList(Resource):
     """
     List of all Transactions
@@ -92,7 +92,7 @@ class TransactionList(Resource):
                 abort(409, 'Name is not unique!')
             abort(500)
 
-@USER_NS.route('/<string:user_name>/transactions/<int:transaction_id>')
+@USER_NS.route('/<string:user_name>/transactions/<int:transaction_id>/')
 class UserDetail(Resource):
     """
     A single transaction
