@@ -12,11 +12,11 @@ APP = Flask(__name__, instance_relative_config=True)  # type: Flask
 
 mode = APP.config['ENV'].upper()
 if mode == 'PRODUCTION':
-    APP.config.from_object('drinklist-api.config.ProductionConfig')
+    APP.config.from_object('drinklist_api.config.ProductionConfig')
 elif mode == 'DEBUG':
-    APP.config.from_object('drinklist-api.config.DebugConfig')
+    APP.config.from_object('drinklist_api.config.DebugConfig')
 elif mode == 'TEST':
-    APP.config.from_object('drinklist-api.config.TestingConfig')
+    APP.config.from_object('drinklist_api.config.TestingConfig')
 
 APP.config.from_pyfile('/etc/drinklist-api.conf', silent=True)
 APP.config.from_pyfile('drinklist-api.conf', silent=True)

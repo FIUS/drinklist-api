@@ -1,8 +1,8 @@
 from setuptools import setup
 
 setup(
-    name='drinklist-api',
-    packages=['drinklist-api'],
+    name='drinklist_api',
+    packages=['drinklist_api'],
     include_package_data=True,
     install_requires=[
         'flask',
