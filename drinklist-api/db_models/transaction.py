@@ -28,13 +28,12 @@ class Transaction(DB.Model):
     timestamp = DB.Column(DB.DateTime, server_default=func.now())
 
     user = DB.relationship(User, lazy='joined')
-    cancels = DB.relationship('Transaction', lazy='joined')
+    cancels = DB.relationship('Transaction', single_parent=True, uselist=False, lazy='joined')
 
     def __init__(self, user: User, amount: int, reason: str, cancels: 'Transaction' = None):
         self.user = user
         self.amount = amount
         self.reason = reason
-        if cancels is not None:
-            self.cancels = [cancels]
+        self.cancels = cancels
 
 
